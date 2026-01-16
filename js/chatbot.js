@@ -5,7 +5,7 @@
 
 // API Configuration
 const CHAT_API_URL = 'http://127.0.0.1:8000/api/chat';
-const USE_BACKEND = true; // Toggle between backend API and direct Gemini
+const USE_BACKEND = true;
 
 // Conversation state management
 const chatState = {
@@ -14,7 +14,8 @@ const chatState = {
     currentContext: 'general',
     sessionId: null,
     fallbackMode: false,
-    isOpen: false
+    isOpen: false,
+    isMinimized: false
 };
 
 // FAQ database for fallback responses - Cancer Support Focused
@@ -124,7 +125,7 @@ function injectChatbotHTML() {
             </button>
             
             <div class="chatbot-container" id="chatbotContainer" role="dialog" aria-label="Hope AI Chat Assistant">
-                <div class="chatbot-header">
+                <div class="chatbot-header" id="chatbotHeader">
                     <div class="chatbot-avatar">
                         <i class="fas fa-ribbon"></i>
                     </div>
@@ -136,10 +137,13 @@ function injectChatbotHTML() {
                         </span>
                     </div>
                     <div class="chatbot-controls">
-                        <button class="chatbot-minimize" aria-label="Minimize chat" tabindex="0">
+                        <button class="chatbot-btn chatbot-minimize" id="chatbotMinimize" aria-label="Minimize chat" title="Minimize">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <button class="chatbot-close" aria-label="Close chat" tabindex="0">
+                        <button class="chatbot-btn chatbot-maximize" id="chatbotMaximize" aria-label="Maximize chat" title="Maximize" style="display: none;">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="chatbot-btn chatbot-close" id="chatbotClose" aria-label="Close chat" title="Close">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -149,9 +153,9 @@ function injectChatbotHTML() {
                     <!-- Messages will be dynamically added here -->
                 </div>
                 
-                <div class="chatbot-input">
+                <div class="chatbot-input" id="chatbotInputArea">
                     <input type="text" id="chatInput" placeholder="Type your message..." aria-label="Chat message input" autocomplete="off" />
-                    <button class="chatbot-send" id="chatSend" aria-label="Send message" tabindex="0">
+                    <button class="chatbot-send" id="chatSend" aria-label="Send message" title="Send">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
@@ -163,74 +167,93 @@ function injectChatbotHTML() {
 }
 
 function setupEventListeners() {
-    // Toggle button
-    const toggleBtn = document.querySelector('.chatbot-toggle');
+    // Toggle button - open/close chatbot
+    const toggleBtn = document.getElementById('chatbotToggle');
     if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
+        toggleBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             toggleChatbot();
-        });
-        toggleBtn.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                toggleChatbot();
-            }
-        });
+        };
     }
 
     // Close button
-    const closeBtn = document.querySelector('.chatbot-close');
+    const closeBtn = document.getElementById('chatbotClose');
     if (closeBtn) {
-        closeBtn.addEventListener('click', (e) => {
+        closeBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             closeChatbot();
-        });
+        };
     }
 
     // Minimize button
-    const minimizeBtn = document.querySelector('.chatbot-minimize');
+    const minimizeBtn = document.getElementById('chatbotMinimize');
     if (minimizeBtn) {
-        minimizeBtn.addEventListener('click', (e) => {
+        minimizeBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
-            closeChatbot();
-        });
+            minimizeChatbot();
+        };
+    }
+
+    // Maximize button (shown when minimized)
+    const maximizeBtn = document.getElementById('chatbotMaximize');
+    if (maximizeBtn) {
+        maximizeBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            maximizeChatbot();
+        };
+    }
+
+    // Header click to maximize when minimized
+    const header = document.getElementById('chatbotHeader');
+    if (header) {
+        header.onclick = function(e) {
+            // Only maximize if clicking on header area (not buttons)
+            if (!e.target.closest('.chatbot-btn') && chatState.isMinimized) {
+                e.preventDefault();
+                maximizeChatbot();
+            }
+        };
     }
 
     // Send button
-    const sendBtn = document.querySelector('.chatbot-send, #chatSend');
+    const sendBtn = document.getElementById('chatSend');
     if (sendBtn) {
-        sendBtn.addEventListener('click', (e) => {
+        sendBtn.onclick = function(e) {
             e.preventDefault();
             sendMessage();
-        });
+        };
     }
 
-    // Input field
-    const input = document.querySelector('#chatInput, .chatbot-input input');
+    // Input field - Enter to send
+    const input = document.getElementById('chatInput');
     if (input) {
-        input.addEventListener('keypress', (e) => {
+        input.onkeypress = function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
-        });
+        };
     }
 
-    // Quick reply delegation
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('quick-reply-btn') || e.target.classList.contains('quick-reply')) {
+    // Quick reply delegation - use event delegation for dynamically added buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('quick-reply-btn')) {
             e.preventDefault();
+            e.stopPropagation();
             handleQuickReply(e.target.textContent.trim());
         }
     });
+
+    console.log('✅ All chatbot event listeners attached');
 }
 
 function toggleChatbot() {
-    const container = document.querySelector('.chatbot-container');
-    const toggle = document.querySelector('.chatbot-toggle');
+    const container = document.getElementById('chatbotContainer');
+    const toggle = document.getElementById('chatbotToggle');
     const badge = document.querySelector('.chatbot-badge');
     
     if (!container) {
@@ -242,9 +265,15 @@ function toggleChatbot() {
     
     if (chatState.isOpen) {
         container.classList.add('show');
+        container.classList.remove('minimized');
         container.style.display = 'flex';
+        chatState.isMinimized = false;
+        
         if (toggle) toggle.classList.add('active');
         if (badge) badge.style.display = 'none';
+        
+        // Update button visibility
+        updateControlButtons();
         
         // Show welcome message if first time
         if (chatState.conversationHistory.length === 0) {
@@ -253,11 +282,13 @@ function toggleChatbot() {
         
         // Focus input
         setTimeout(() => {
-            const input = document.querySelector('#chatInput, .chatbot-input input');
+            const input = document.getElementById('chatInput');
             if (input) input.focus();
         }, 350);
     } else {
         container.classList.remove('show');
+        container.classList.remove('minimized');
+        chatState.isMinimized = false;
         if (toggle) toggle.classList.remove('active');
     }
     
@@ -265,19 +296,69 @@ function toggleChatbot() {
 }
 
 function closeChatbot() {
-    const container = document.querySelector('.chatbot-container');
-    const toggle = document.querySelector('.chatbot-toggle');
+    const container = document.getElementById('chatbotContainer');
+    const toggle = document.getElementById('chatbotToggle');
     
     chatState.isOpen = false;
+    chatState.isMinimized = false;
     
     if (container) {
         container.classList.remove('show');
+        container.classList.remove('minimized');
+        container.style.display = 'none';
     }
     if (toggle) {
         toggle.classList.remove('active');
     }
     
     console.log('❌ Chatbot closed');
+}
+
+function minimizeChatbot() {
+    const container = document.getElementById('chatbotContainer');
+    
+    if (!container) return;
+    
+    chatState.isMinimized = true;
+    container.classList.add('minimized');
+    
+    // Update button visibility
+    updateControlButtons();
+    
+    console.log('➖ Chatbot minimized');
+}
+
+function maximizeChatbot() {
+    const container = document.getElementById('chatbotContainer');
+    
+    if (!container) return;
+    
+    chatState.isMinimized = false;
+    container.classList.remove('minimized');
+    
+    // Update button visibility
+    updateControlButtons();
+    
+    // Focus input
+    setTimeout(() => {
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
+    }, 100);
+    
+    console.log('➕ Chatbot maximized');
+}
+
+function updateControlButtons() {
+    const minimizeBtn = document.getElementById('chatbotMinimize');
+    const maximizeBtn = document.getElementById('chatbotMaximize');
+    
+    if (chatState.isMinimized) {
+        if (minimizeBtn) minimizeBtn.style.display = 'none';
+        if (maximizeBtn) maximizeBtn.style.display = 'flex';
+    } else {
+        if (minimizeBtn) minimizeBtn.style.display = 'flex';
+        if (maximizeBtn) maximizeBtn.style.display = 'none';
+    }
 }
 
 function openChatbot() {
@@ -287,13 +368,25 @@ function openChatbot() {
 }
 
 function showWelcomeMessage() {
-    const welcomeMsg = "Hello! 👋 I'm **Hope**, your AI assistant at Jarurat Care Foundation.\n\n**\"Jaisi Jarurat, Vaisi Care\"** - As the need, so the care.\n\nWe support cancer patients and their families. How can I help you today?";
+    const welcomeMsg = `## 👋 Welcome to Jarurat Care!
+
+I'm **Hope**, your AI assistant.
+
+**"Jaisi Jarurat, Vaisi Care"** - As the need, so the care.
+
+We support cancer patients and their families through:
+- 🏥 Patient Advocacy & Treatment Navigation
+- 💚 Emotional Support & Counseling
+- 🤝 Community Connection & Mentorship
+- 💰 Financial Assistance Programs
+
+**How can I help you today?**`;
     
     addMessage(welcomeMsg, 'bot', ['Seek Cancer Support', 'Become a Volunteer', 'Locate Hospitals', 'Donate']);
 }
 
 function addMessage(text, sender = 'user', quickReplies = []) {
-    const messagesContainer = document.querySelector('.chatbot-messages, #chatbotMessages');
+    const messagesContainer = document.getElementById('chatbotMessages');
     if (!messagesContainer) {
         console.error('Messages container not found');
         return;
@@ -306,13 +399,15 @@ function addMessage(text, sender = 'user', quickReplies = []) {
     const formattedText = formatMessage(text);
     
     const avatarIcon = sender === 'bot' ? 'fa-ribbon' : 'fa-user';
+    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     messageDiv.innerHTML = `
         <div class="message-avatar">
             <i class="fas ${avatarIcon}"></i>
         </div>
-        <div class="message-content">
-            ${formattedText}
+        <div class="message-bubble">
+            <div class="message-content">${formattedText}</div>
+            <div class="message-time">${timestamp}</div>
         </div>
     `;
 
@@ -323,8 +418,11 @@ function addMessage(text, sender = 'user', quickReplies = []) {
         addQuickReplies(quickReplies);
     }
 
-    // Scroll to bottom
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    // Scroll to bottom smoothly
+    messagesContainer.scrollTo({
+        top: messagesContainer.scrollHeight,
+        behavior: 'smooth'
+    });
 
     // Store in conversation history
     chatState.conversationHistory.push({
@@ -335,16 +433,32 @@ function addMessage(text, sender = 'user', quickReplies = []) {
 }
 
 function formatMessage(text) {
-    return text
+    let formatted = text
+        // Headers
+        .replace(/^## (.*?)$/gm, '<h4 class="msg-header">$1</h4>')
+        .replace(/^### (.*?)$/gm, '<h5 class="msg-subheader">$1</h5>')
+        // Bold
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        // Line breaks
         .replace(/\n/g, '<br>')
-        .replace(/• /g, '&bull; ');
+        // Bullet points
+        .replace(/• /g, '<span class="bullet">•</span> ')
+        .replace(/- /g, '<span class="bullet">•</span> ')
+        // Numbered lists (1. 2. 3.)
+        .replace(/^(\d+)\. /gm, '<span class="number">$1.</span> ');
+    
+    return formatted;
 }
 
 function addQuickReplies(replies) {
-    const messagesContainer = document.querySelector('.chatbot-messages, #chatbotMessages');
+    const messagesContainer = document.getElementById('chatbotMessages');
     if (!messagesContainer || replies.length === 0) return;
+
+    // Remove existing quick replies
+    const existing = messagesContainer.querySelectorAll('.quick-replies');
+    existing.forEach(el => el.remove());
 
     const quickRepliesDiv = document.createElement('div');
     quickRepliesDiv.className = 'quick-replies';
@@ -353,19 +467,28 @@ function addQuickReplies(replies) {
         const btn = document.createElement('button');
         btn.className = 'quick-reply-btn';
         btn.textContent = reply;
-        btn.setAttribute('tabindex', '0');
+        btn.type = 'button';
         quickRepliesDiv.appendChild(btn);
     });
 
     messagesContainer.appendChild(quickRepliesDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Scroll to show quick replies
+    messagesContainer.scrollTo({
+        top: messagesContainer.scrollHeight,
+        behavior: 'smooth'
+    });
 }
 
 function showTypingIndicator() {
-    const messagesContainer = document.querySelector('.chatbot-messages, #chatbotMessages');
+    const messagesContainer = document.getElementById('chatbotMessages');
     if (!messagesContainer || chatState.isTyping) return;
 
     chatState.isTyping = true;
+
+    // Remove existing quick replies while typing
+    const quickReplies = messagesContainer.querySelectorAll('.quick-replies');
+    quickReplies.forEach(el => el.remove());
 
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message bot-message typing-indicator';
@@ -374,7 +497,7 @@ function showTypingIndicator() {
         <div class="message-avatar">
             <i class="fas fa-ribbon"></i>
         </div>
-        <div class="message-content">
+        <div class="message-bubble">
             <div class="typing-dots">
                 <span></span><span></span><span></span>
             </div>
@@ -382,25 +505,28 @@ function showTypingIndicator() {
     `;
 
     messagesContainer.appendChild(typingDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    messagesContainer.scrollTo({
+        top: messagesContainer.scrollHeight,
+        behavior: 'smooth'
+    });
 }
 
 function hideTypingIndicator() {
     chatState.isTyping = false;
-    const typingIndicator = document.querySelector('.typing-indicator, #typingIndicator');
+    const typingIndicator = document.getElementById('typingIndicator');
     if (typingIndicator) {
         typingIndicator.remove();
     }
 }
 
 async function sendMessage() {
-    const input = document.querySelector('#chatInput, .chatbot-input input');
+    const input = document.getElementById('chatInput');
     if (!input) return;
 
     const message = input.value.trim();
     if (!message) return;
 
-    // Clear input
+    // Clear input immediately
     input.value = '';
 
     // Remove existing quick replies
@@ -413,8 +539,18 @@ async function sendMessage() {
     // Show typing indicator
     showTypingIndicator();
 
+    // Update status
+    updateStatus('Thinking...');
+
     // Process message
     await processMessage(message);
+}
+
+function updateStatus(status) {
+    const statusEl = document.getElementById('ai-status');
+    if (statusEl) {
+        statusEl.textContent = status;
+    }
 }
 
 async function processMessage(message) {
@@ -425,6 +561,7 @@ async function processMessage(message) {
         // Try backend API first if enabled
         if (USE_BACKEND) {
             try {
+                console.log('📡 Sending to backend API...');
                 const apiResponse = await fetch(CHAT_API_URL, {
                     method: 'POST',
                     headers: {
@@ -439,46 +576,109 @@ async function processMessage(message) {
                 if (apiResponse.ok) {
                     const data = await apiResponse.json();
                     hideTypingIndicator();
+                    updateStatus('Online • Jarurat Care');
                     chatState.sessionId = data.sessionId;
-                    addMessage(data.response, 'bot', data.quickReplies || []);
+                    
+                    // Format the response for better structure
+                    const formattedResponse = formatAIResponse(data.response);
+                    addMessage(formattedResponse, 'bot', data.quickReplies || getContextualQuickReplies(message));
+                    console.log('✅ Backend response received');
                     return;
+                } else {
+                    console.warn('Backend returned error:', apiResponse.status);
                 }
             } catch (apiError) {
-                console.warn('Backend API unavailable, using fallback:', apiError.message);
+                console.warn('⚠️ Backend API unavailable:', apiError.message);
+                updateStatus('Connecting...');
             }
         }
 
-        // Try Gemini AI directly if available
+        // Try direct Gemini AI if available (via ai-service.js)
         if (window.geminiAI && !chatState.fallbackMode) {
-            const aiResult = await window.geminiAI.chat(
-                message, 
-                chatState.conversationHistory.slice(-6),
-                'chatbot'
-            );
+            try {
+                console.log('🤖 Trying direct Gemini AI...');
+                const aiResult = await window.geminiAI.chat(
+                    message, 
+                    chatState.conversationHistory.slice(-6),
+                    'chatbot'
+                );
 
-            if (aiResult.success) {
-                hideTypingIndicator();
-                response = aiResult.response;
-                quickReplies = extractQuickRepliesFromContext(message);
-                addMessage(response, 'bot', quickReplies);
-                return;
-            } else {
-                console.warn('Gemini AI failed, using FAQ fallback');
-                chatState.fallbackMode = true;
-                setTimeout(() => { chatState.fallbackMode = false; }, 60000);
+                if (aiResult.success) {
+                    hideTypingIndicator();
+                    updateStatus('Online • AI');
+                    const formattedResponse = formatAIResponse(aiResult.response);
+                    addMessage(formattedResponse, 'bot', getContextualQuickReplies(message));
+                    console.log('✅ Direct Gemini response received');
+                    return;
+                } else {
+                    console.warn('Gemini AI failed, using FAQ fallback');
+                    chatState.fallbackMode = true;
+                    setTimeout(() => { chatState.fallbackMode = false; }, 60000);
+                }
+            } catch (aiError) {
+                console.warn('Direct Gemini error:', aiError.message);
             }
         }
 
         // Final fallback to pattern matching
+        console.log('📚 Using FAQ fallback...');
         const fallbackResponse = getFallbackResponse(message);
         hideTypingIndicator();
+        updateStatus('Online • Offline Mode');
         addMessage(fallbackResponse.response, 'bot', fallbackResponse.quickReplies);
 
     } catch (error) {
-        console.error('Chat error:', error);
+        console.error('❌ Chat error:', error);
         hideTypingIndicator();
+        updateStatus('Error');
         addMessage("I apologize, but I'm having trouble processing your request. Please try again or contact us at **Priyanka.joshi@jarurat.care**", 'bot', ['Try Again', 'Contact Us']);
     }
+}
+
+function formatAIResponse(response) {
+    // Check if response already has formatting
+    if (response.includes('**') || response.includes('##') || response.includes('•')) {
+        return response;
+    }
+    
+    // Add structure to plain text responses
+    let formatted = response;
+    
+    // Convert sentences ending with : to bold headers
+    formatted = formatted.replace(/^([^:\n]{10,50}):(\s)/gm, '**$1:**$2');
+    
+    // Convert numbered items to proper format
+    formatted = formatted.replace(/(\d)\)/g, '$1.');
+    
+    // Add bullet points where appropriate
+    formatted = formatted.replace(/^[-•]\s*/gm, '• ');
+    
+    return formatted;
+}
+
+function getContextualQuickReplies(message) {
+    const lower = message.toLowerCase();
+    
+    if (lower.includes('patient') || lower.includes('help') || lower.includes('support') || lower.includes('cancer')) {
+        return ['Fill Patient Form', 'Our Services', 'Emergency Help'];
+    }
+    if (lower.includes('volunteer') || lower.includes('join') || lower.includes('contribute')) {
+        return ['Register Now', 'Learn More', 'Contact Team'];
+    }
+    if (lower.includes('emergency') || lower.includes('urgent') || lower.includes('critical')) {
+        return ['Call 108', 'Urgent Form', 'Locate Hospitals'];
+    }
+    if (lower.includes('thank') || lower.includes('great') || lower.includes('helpful')) {
+        return ['More Questions', 'Patient Form', 'Goodbye'];
+    }
+    if (lower.includes('donate') || lower.includes('give') || lower.includes('contribution')) {
+        return ['Donate Now', 'Other Ways to Help', 'Our Impact'];
+    }
+    if (lower.includes('hospital') || lower.includes('doctor') || lower.includes('treatment')) {
+        return ['Locate Hospitals', 'Find Specialist', 'Patient Form'];
+    }
+    
+    return ['Cancer Support', 'Volunteer', 'Contact Us'];
 }
 
 function getFallbackResponse(message) {
@@ -501,28 +701,6 @@ function getFallbackResponse(message) {
     };
 }
 
-function extractQuickRepliesFromContext(message) {
-    const lower = message.toLowerCase();
-    
-    if (lower.includes('patient') || lower.includes('help') || lower.includes('support') || lower.includes('cancer')) {
-        return ['Fill Patient Form', 'Our Services', 'Emergency Help'];
-    }
-    if (lower.includes('volunteer') || lower.includes('join') || lower.includes('contribute')) {
-        return ['Register Now', 'Learn More', 'Contact Team'];
-    }
-    if (lower.includes('emergency') || lower.includes('urgent') || lower.includes('critical')) {
-        return ['Call 108', 'Urgent Form', 'Locate Hospitals'];
-    }
-    if (lower.includes('thank') || lower.includes('great') || lower.includes('helpful')) {
-        return ['More Questions', 'Patient Form', 'Goodbye'];
-    }
-    if (lower.includes('donate') || lower.includes('give') || lower.includes('contribute')) {
-        return ['Donate Now', 'Other Ways to Help', 'Our Impact'];
-    }
-    
-    return ['Cancer Support', 'Volunteer', 'Contact Us'];
-}
-
 function handleQuickReply(text) {
     const navigationMap = {
         'Patient Form': 'patient-form.html',
@@ -539,9 +717,12 @@ function handleQuickReply(text) {
         'Call 108': 'tel:108',
         'Call Helpline': 'tel:+919876543210',
         'Donate Now': 'https://www.jarurat.care/donate',
+        'Donate': 'https://www.jarurat.care/donate',
         'Locate Hospitals': 'https://www.jarurat.care/hospitals',
+        'View Hospitals': 'https://www.jarurat.care/hospitals',
         'Start New Chat': 'clear_chat',
-        'Goodbye': 'close_chat'
+        'Goodbye': 'close_chat',
+        'Try Again': 'retry'
     };
 
     const destination = navigationMap[text];
@@ -557,6 +738,12 @@ function handleQuickReply(text) {
         return;
     }
     
+    if (destination === 'retry') {
+        const input = document.getElementById('chatInput');
+        if (input) input.focus();
+        return;
+    }
+    
     if (destination && (destination.startsWith('http') || destination.startsWith('tel:'))) {
         window.open(destination, '_blank');
         return;
@@ -567,8 +754,8 @@ function handleQuickReply(text) {
         return;
     }
 
-    // If no navigation, treat as a message
-    const input = document.querySelector('#chatInput, .chatbot-input input');
+    // If no navigation, treat as a message to send
+    const input = document.getElementById('chatInput');
     if (input) {
         input.value = text;
         sendMessage();
@@ -576,7 +763,7 @@ function handleQuickReply(text) {
 }
 
 function clearChat() {
-    const messagesContainer = document.querySelector('.chatbot-messages, #chatbotMessages');
+    const messagesContainer = document.getElementById('chatbotMessages');
     if (messagesContainer) {
         messagesContainer.innerHTML = '';
     }
@@ -590,6 +777,8 @@ function clearChat() {
 window.toggleChatbot = toggleChatbot;
 window.closeChatbot = closeChatbot;
 window.openChatbot = openChatbot;
+window.minimizeChatbot = minimizeChatbot;
+window.maximizeChatbot = maximizeChatbot;
 window.sendChatMessage = sendMessage;
 window.clearChat = clearChat;
 window.handleChatKeyPress = function(event) {
@@ -600,6 +789,5 @@ window.handleChatKeyPress = function(event) {
 window.sendQuickReply = function(text) {
     handleQuickReply(text);
 };
-window.minimizeChatbot = closeChatbot;
 
-// End of Hope AI Chatbot
+console.log('🎯 Hope AI Chatbot script loaded');
