@@ -1,0 +1,96 @@
+{
+  "categories": {
+    "medical_services": {
+      "name": "Medical Services",
+      "faqs": [
+        {
+          "question": "What medical services do you provide?",
+          "answer": "We provide medical consultations, home care services, emergency support, ambulance coordination, and medicine assistance."
+        },
+        {
+          "question": "How do I book a consultation?",
+          "answer": "Fill out the Patient Support form on our website, select 'Medical Consultation' as the support type, and our team will contact you within the estimated response time."
+        },
+        {
+          "question": "Do you offer telemedicine services?",
+          "answer": "Yes, we offer both online and in-person consultations. Please specify your preference when submitting your request."
+        }
+      ]
+    },
+    "emergency": {
+      "name": "Emergency Support",
+      "faqs": [
+        {
+          "question": "What should I do in a medical emergency?",
+          "answer": "For life-threatening emergencies, call 108 immediately. For urgent but non-critical issues, submit a request marked as 'Critical' and we'll respond within 1-2 hours."
+        },
+        {
+          "question": "Do you provide ambulance services?",
+          "answer": "Yes, we coordinate ambulance services and can help arrange transportation to the nearest hospital."
+        },
+        {
+          "question": "What are your emergency response times?",
+          "answer": "Critical cases: 1-2 hours, High priority: 4-6 hours, Medium: 12-24 hours, Low: 24-48 hours."
+        }
+      ]
+    },
+    "volunteer": {
+      "name": "Volunteer Program",
+      "faqs": [
+        {
+          "question": "How can I become a volunteer?",
+          "answer": "Fill out our Volunteer Registration form with your details, availability, and areas of interest. We'll review your application and contact you within 3-5 business days."
+        },
+        {
+          "question": "What are the requirements to volunteer?",
+          "answer": "We welcome volunteers from all backgrounds. Medical professionals need valid licenses, while others should have a genuine interest in healthcare support. All volunteers undergo background verification."
+        },
+        {
+          "question": "How much time do I need to commit?",
+          "answer": "We offer flexible schedules. Volunteers typically commit 4-20 hours per week based on their availability."
+        }
+      ]
+    },
+    "home_care": {
+      "name": "Home Care Services",
+      "faqs": [
+        {
+          "question": "What home care services are available?",
+          "answer": "We provide nursing care, physiotherapy, medication management, wound care, and companionship services at home."
+        },
+        {
+          "question": "How is a caregiver assigned?",
+          "answer": "Based on your medical needs and preferences, we match you with trained caregivers from our network."
+        },
+        {
+          "question": "Can I request specific timings?",
+          "answer": "Yes, home care can be arranged on a daily, weekly, or long-term basis with flexible timings."
+        }
+      ]
+    },
+    "payment": {
+      "name": "Payment & Insurance",
+      "faqs": [
+        {
+          "question": "Do you accept insurance?",
+          "answer": "Yes, we work with major insurance providers. Please provide your insurance details when submitting your request."
+        },
+        {
+          "question": "What if I can't afford treatment?",
+          "answer": "We offer financial assistance programs for eligible patients. Please mention your situation in the Patient Support form, and our team will discuss available options."
+        },
+        {
+          "question": "Do you offer payment plans?",
+          "answer": "Yes, we provide flexible payment plans based on individual circumstances. Discuss this with our support team during consultation."
+        }
+      ]
+    }
+  },
+  "quick_responses": {
+    "greeting": "Hello! Welcome to Jarurat Care. How can I assist you today?",
+    "goodbye": "Thank you for contacting Jarurat Care. Take care and stay healthy!",
+    "unclear": "I'm not sure I understood that correctly. Could you please rephrase or choose from the options below?",
+    "emergency": "For immediate medical emergencies, please call 108 or visit the nearest hospital. Our team can also help coordinate emergency support.",
+    "form_help": "I can help you fill out the form. What information do you need assistance with?"
+  }
+}

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Registration - Jarurat Care Foundation</title>
+    <meta name="description" content="Join Jarurat Care Foundation as a volunteer. Help cancer patients and their families through mentorship, support, and care.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Skip to main content -->
+    <a href="#volunteerForm" class="skip-link">Skip to form</a>
+
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-ribbon" aria-hidden="true"></i>
+                <span>Jarurat Care</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="patient-form.html">Seek Support</a></li>
+                <li><a href="volunteer-form.html" class="active" aria-current="page">Become a Volunteer</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Form Header -->
+    <section class="form-header" aria-labelledby="form-heading">
+        <div class="container">
+            <h1 id="form-heading"><i class="fas fa-hands-helping" aria-hidden="true"></i> Join Our Volunteer Family</h1>
+            <p>Make a meaningful difference in the lives of cancer patients and their families. Whether you're a survivor, caregiver, healthcare professional, or someone who wants to help — we welcome you.</p>
+            <div class="form-progress" id="formProgress" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="4">
+                <div class="progress-step active" aria-current="step">Personal Details</div>
+                <div class="progress-step">Background</div>
+                <div class="progress-step">Availability</div>
+                <div class="progress-step">Skills & Interests</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form Section -->
+    <section class="form-section">
+        <div class="container">
+            <form id="volunteerForm" class="healthcare-form" novalidate>
+                <!-- Personal Details -->
+                <div class="form-step active" data-step="1">
+                    <h2 class="form-step-title">
+                        <i class="fas fa-user"></i> Personal Details
+                    </h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">Full Name <span class="required">*</span></label>
+                            <input type="text" id="fullName" name="fullName" required>
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="dob">Date of Birth <span class="required">*</span></label>
+                            <input type="date" id="dob" name="dob" required>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender">Gender <span class="required">*</span></label>
+                            <select id="gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactNumber">Contact Number <span class="required">*</span></label>
+                            <input type="tel" id="contactNumber" name="contactNumber" pattern="[0-9]{10}" required>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Current Address <span class="required">*</span></label>
+                        <textarea id="address" name="address" rows="3" required></textarea>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-primary" onclick="nextStep(1)">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="form-step" data-step="2">
+                    <h2 class="form-step-title">
+                        <i class="fas fa-briefcase"></i> Professional Information
+                    </h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="profession">Profession/Occupation <span class="required">*</span></label>
+                            <input type="text" id="profession" name="profession" required>
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="education">Educational Qualification <span class="required">*</span></label>
+                            <select id="education" name="education" required>
+                                <option value="">Select Qualification</option>
+                                <option value="high-school">High School</option>
+                                <option value="graduate">Graduate</option>
+                                <option value="post-graduate">Post-Graduate</option>
+                                <option value="medical-professional">Medical Professional</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Do you have a medical background? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="medicalBackground" value="yes" onchange="toggleLicenseField(true)">
+                                <span>Yes</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="medicalBackground" value="no" onchange="toggleLicenseField(false)">
+                                <span>No</span>
+                            </label>
+                        </div>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-group" id="licenseField" style="display: none;">
+                        <label for="licenseNumber">License/Certification Number</label>
+                        <input type="text" id="licenseNumber" name="licenseNumber">
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Availability -->
+                <div class="form-step" data-step="3">
+                    <h2 class="form-step-title">
+                        <i class="fas fa-calendar-alt"></i> Availability
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Days Available <span class="required">*</span></label>
+                        <div class="checkbox-group days-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="monday">
+                                <span>Monday</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="tuesday">
+                                <span>Tuesday</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="wednesday">
+                                <span>Wednesday</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="thursday">
+                                <span>Thursday</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="friday">
+                                <span>Friday</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="saturday">
+                                <span>Saturday</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="daysAvailable" value="sunday">
+                                <span>Sunday</span>
+                            </label>
+                        </div>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Preferred Time Slots <span class="required">*</span></label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="timeSlots" value="morning">
+                                <span>Morning (6 AM - 12 PM)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="timeSlots" value="afternoon">
+                                <span>Afternoon (12 PM - 6 PM)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="timeSlots" value="evening">
+                                <span>Evening (6 PM - 10 PM)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="timeSlots" value="night">
+                                <span>Night (10 PM - 6 AM)</span>
+                            </label>
+                        </div>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hoursPerWeek">Hours Available per Week <span class="required">*</span></label>
+                            <input type="number" id="hoursPerWeek" name="hoursPerWeek" min="1" max="168" required>
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Can you start immediately? <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="immediateStart" value="yes">
+                                    <span>Yes</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="immediateStart" value="no">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Skills & Emergency Contact -->
+                <div class="form-step" data-step="4">
+                    <h2 class="form-step-title">
+                        <i class="fas fa-star"></i> Skills & Interests
+                    </h2>
+
+                    <div class="form-group">
+                        <label>Areas of Interest <span class="required" aria-hidden="true">*</span></label>
+                        <div class="checkbox-group" role="group" aria-label="Volunteer areas of interest">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="peer-mentorship">
+                                <span>Peer Mentorship (Support fellow patients/survivors)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="emotional-support">
+                                <span>Emotional Support (Counseling patients & families)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="treatment-navigation">
+                                <span>Treatment Navigation (Help find doctors, hospitals)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="logistics">
+                                <span>Logistics Support (Transportation, accommodation)</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="fundraising">
+                                <span>Fundraising & Awareness</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="social-media">
+                                <span>Social Media & Content Creation</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="technical">
+                                <span>Technical/IT Support</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="areasOfInterest" value="medical-guidance">
+                                <span>Medical Guidance (Healthcare professionals only)</span>
+                            </label>
+                        </div>
+                        <span class="error-message" role="alert"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cancerExperience">Cancer Experience (Optional)</label>
+                        <select id="cancerExperience" name="cancerExperience">
+                            <option value="">Select if applicable</option>
+                            <option value="survivor">I am a cancer survivor</option>
+                            <option value="caregiver">I am/was a caregiver</option>
+                            <option value="lost-loved-one">I lost a loved one to cancer</option>
+                            <option value="healthcare">I am a healthcare professional</option>
+                            <option value="none">No personal experience (wanting to help)</option>
+                        </select>
+                        <span class="error-message" role="alert"></span>
+                        <small>Your personal experience can help you connect better with patients</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="languages">Languages Known <span class="required" aria-hidden="true">*</span></label>
+                            <input type="text" id="languages" name="languages" placeholder="e.g., Hindi, English, Marathi" required aria-required="true">
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motivation">Why do you want to volunteer with Jarurat Care?</label>
+                        <textarea id="motivation" name="motivation" rows="3" placeholder="Tell us about your motivation to help cancer patients"></textarea>
+                        <span class="error-message" role="alert"></span>
+                    </div>
+
+                    <h2 class="form-step-title" id="emergency-title">
+                        <i class="fas fa-phone-alt" aria-hidden="true"></i> Emergency Contact
+                    </h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emergencyName">Contact Name <span class="required" aria-hidden="true">*</span></label>
+                            <input type="text" id="emergencyName" name="emergencyName" required aria-required="true">
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="emergencyRelationship">Relationship <span class="required" aria-hidden="true">*</span></label>
+                            <input type="text" id="emergencyRelationship" name="emergencyRelationship" required aria-required="true">
+                            <span class="error-message" role="alert"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyContact">Emergency Contact Number <span class="required" aria-hidden="true">*</span></label>
+                        <input type="tel" id="emergencyContact" name="emergencyContact" pattern="[6-9][0-9]{9}" required aria-required="true" placeholder="9876543210">
+                        <span class="error-message" role="alert"></span>
+                        <small>Enter 10-digit Indian mobile number</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label consent-checkbox">
+                            <input type="checkbox" id="backgroundCheck" name="backgroundCheck" required aria-required="true">
+                            <span>I consent to background verification as part of the volunteer onboarding process. <span class="required" aria-hidden="true">*</span></span>
+                        </label>
+                        <span class="error-message" role="alert"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label consent-checkbox">
+                            <input type="checkbox" id="volunteerAgreement" name="volunteerAgreement" required aria-required="true">
+                            <span>I agree to uphold Jarurat Care Foundation's values and commit to supporting cancer patients with compassion and respect. <span class="required" aria-hidden="true">*</span></span>
+                        </label>
+                        <span class="error-message" role="alert"></span>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" onclick="prevStep(4)">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i> Previous
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check" aria-hidden="true"></i> Submit Registration
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Auto-save Indicator -->
+            <div class="auto-save-indicator" id="autoSaveIndicator" role="status" aria-live="polite">
+                <i class="fas fa-save" aria-hidden="true"></i> Form auto-saved
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
+        <div class="modal-content success">
+            <div class="modal-icon">
+                <i class="fas fa-check-circle" aria-hidden="true"></i>
+            </div>
+            <h2 id="successModalTitle">Welcome to the Jarurat Care Family! 🎗️</h2>
+            <p>Thank you for joining our mission to support cancer patients.</p>
+            <div class="modal-details">
+                <p><strong>Volunteer ID:</strong> <span id="volunteerId"></span></p>
+                <p><strong>Next Steps:</strong></p>
+                <ul class="modal-list">
+                    <li>You will receive an onboarding email within 24-48 hours</li>
+                    <li>Our coordinator will contact you to schedule orientation</li>
+                    <li>Training materials will be shared based on your areas of interest</li>
+                </ul>
+                <p class="modal-note">Questions? Reach us at: <strong><a href="mailto:Priyanka.joshi@jarurat.care">Priyanka.joshi@jarurat.care</a></strong></p>
+            </div>
+            <div class="modal-buttons">
+                <a href="index.html" class="btn btn-primary">Back to Home</a>
+                <button class="btn btn-secondary" onclick="window.print()">
+                    <i class="fas fa-print" aria-hidden="true"></i> Print Confirmation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 Jarurat Care Foundation. In memory of Rekha Joshi. | <a href="mailto:Priyanka.joshi@jarurat.care">Contact Us</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot is injected by chatbot.js -->
+
+    <script src="js/storage.js"></script>
+    <script src="js/ai-service.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/forms.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>

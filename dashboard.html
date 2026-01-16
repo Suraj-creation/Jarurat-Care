@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Jarurat Care</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-heartbeat"></i>
+                <span>Jarurat Care</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="patient-form.html">Patient Support</a></li>
+                <li><a href="volunteer-form.html">Become a Volunteer</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <section class="dashboard-header">
+        <div class="container">
+            <h1><i class="fas fa-chart-line"></i> Analytics Dashboard</h1>
+            <p>Real-time overview of patient requests and volunteer activities</p>
+            <div class="dashboard-actions">
+                <button class="btn btn-primary" onclick="generateReport()">
+                    <i class="fas fa-file-pdf"></i> Generate Report
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export Data
+                </button>
+                <button class="btn btn-outline" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <section class="dashboard-section">
+        <div class="container">
+            <!-- Stats Cards -->
+            <div class="dashboard-stats">
+                <div class="stat-card-dashboard">
+                    <div class="stat-icon-dashboard critical">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="criticalCases">0</h3>
+                        <p>Critical Cases</p>
+                        <span class="stat-change up">+3 today</span>
+                    </div>
+                </div>
+                <div class="stat-card-dashboard">
+                    <div class="stat-icon-dashboard patient">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalPatients">0</h3>
+                        <p>Patient Requests</p>
+                        <span class="stat-change up">+12 this week</span>
+                    </div>
+                </div>
+                <div class="stat-card-dashboard">
+                    <div class="stat-icon-dashboard volunteer">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalVolunteers">0</h3>
+                        <p>Active Volunteers</p>
+                        <span class="stat-change up">+5 new</span>
+                    </div>
+                </div>
+                <div class="stat-card-dashboard">
+                    <div class="stat-icon-dashboard contact">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="totalMessages">0</h3>
+                        <p>Messages Received</p>
+                        <span class="stat-change">8 pending</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="dashboard-charts">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-pie"></i> Support Type Distribution</h3>
+                        <select class="chart-filter" onchange="updateSupportChart(this.value)">
+                            <option value="all">All Time</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                        </select>
+                    </div>
+                    <canvas id="supportTypeChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3><i class="fas fa-chart-bar"></i> Urgency Levels</h3>
+                        <select class="chart-filter" onchange="updateUrgencyChart(this.value)">
+                            <option value="all">All Time</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                        </select>
+                    </div>
+                    <canvas id="urgencyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="chart-card-full">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-line"></i> Request Trends (Last 7 Days)</h3>
+                    <div class="chart-legend">
+                        <span><i class="fas fa-circle" style="color: #2E7D32;"></i> Patient Requests</span>
+                        <span><i class="fas fa-circle" style="color: #1976D2;"></i> Volunteer Registrations</span>
+                    </div>
+                </div>
+                <canvas id="trendChart"></canvas>
+            </div>
+
+            <!-- Recent Submissions -->
+            <div class="dashboard-tables">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3><i class="fas fa-clipboard-list"></i> Recent Patient Requests</h3>
+                        <div class="table-filters">
+                            <input type="text" class="search-input" placeholder="Search..." onkeyup="filterTable('patientTable', this.value)">
+                            <select class="filter-select" onchange="filterByUrgency(this.value)">
+                                <option value="all">All Urgency</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="patientTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Age</th>
+                                    <th>Support Type</th>
+                                    <th>Urgency</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3><i class="fas fa-users"></i> Recent Volunteer Registrations</h3>
+                        <div class="table-filters">
+                            <input type="text" class="search-input" placeholder="Search..." onkeyup="filterTable('volunteerTable', this.value)">
+                            <select class="filter-select" onchange="filterByAvailability(this.value)">
+                                <option value="all">All Volunteers</option>
+                                <option value="immediate">Immediate Start</option>
+                                <option value="medical">Medical Background</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="volunteerTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Volunteer ID</th>
+                                    <th>Name</th>
+                                    <th>Profession</th>
+                                    <th>Areas of Interest</th>
+                                    <th>Hours/Week</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="volunteerTableBody">
+                                <!-- Data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI-Powered Insights Panel -->
+            <div class="ai-insights-panel">
+                <h3><i class="fas fa-brain"></i> AI-Powered Insights</h3>
+                <div id="aiInsights" class="ai-insights-content">
+                    <div class="ai-insight-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Initializing AI analysis...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auto-generated Summary -->
+            <div class="summary-card">
+                <h3><i class="fas fa-robot"></i> AI-Generated Daily Summary</h3>
+                <div class="summary-content" id="aiSummary">
+                    <div class="summary-section">
+                        <h4>Overview</h4>
+                        <p>Today we received <strong id="todayPatients">0</strong> new patient requests and <strong id="todayVolunteers">0</strong> volunteer registrations. The most requested support type is <strong id="topSupport">Medical Consultation</strong>.</p>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Critical Alerts</h4>
+                        <div class="alert-item critical" id="criticalAlert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span><strong>3 critical cases</strong> require immediate attention.</span>
+                        </div>
+                        <div class="alert-item warning">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>12 high-priority cases</strong> pending response within 24 hours.</span>
+                        </div>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Volunteer Matching</h4>
+                        <p>Based on current availability and skills, <strong id="matchCount">15</strong> patient-volunteer matches are recommended. The system has automatically assigned volunteers to critical cases.</p>
+                    </div>
+                    <div class="summary-section">
+                        <h4>Response Metrics</h4>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <span class="metric-label">Avg Response Time</span>
+                                <span class="metric-value">4.5 hours</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Resolution Rate</span>
+                                <span class="metric-value">92%</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Satisfaction Score</span>
+                                <span class="metric-value">4.8/5.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="refreshSummary()">
+                    <i class="fas fa-sync"></i> Regenerate Summary
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Jarurat Care. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot -->
+    <div class="chatbot-container" id="chatbotContainer">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-robot"></i>
+                <span>JaruCare Assistant</span>
+                <span class="chatbot-status">Online</span>
+            </div>
+            <div class="chatbot-controls">
+                <button class="chatbot-minimize" onclick="minimizeChatbot()">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="chatbot-close" onclick="closeChatbot()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message bot-message">
+                <div class="message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>Hello! I can help you understand the dashboard data. What would you like to know?</p>
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
+            <button class="chatbot-send" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <script src="js/storage.js"></script>
+    <script src="js/ai-service.js"></script>
+    <script src="js/sample-data.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+</html>
